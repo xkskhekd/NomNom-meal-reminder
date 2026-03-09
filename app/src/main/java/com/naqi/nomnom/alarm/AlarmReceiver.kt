@@ -1,27 +1,47 @@
 package com.naqi.nomnom.alarm
 
-import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import androidx.core.app.NotificationCompat
 
 class AlarmReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
 
-        val builder = NotificationCompat.Builder(
-            context,
-            NotificationHelper.CHANNEL_ID
-        )
-            .setSmallIcon(android.R.drawable.ic_dialog_info)
-            .setContentTitle("NomNom")
-            .setContentText("Time to eat!")
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
+        val typeString = intent.getStringExtra("ALARM_TYPE")
 
-        val manager =
-            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val alarmType = try {
+            AlarmType.valueOf(typeString ?: "")
+        } catch (_: Exception) {
+            AlarmType.CUSTOM
+        }
 
-        manager.notify(1, builder.build())
+        NotificationHelper.showNotification(context, alarmType)
+
+        rescheduleAlarm(context, alarmType)
+    }
+
+    private fun rescheduleAlarm(context: Context, type: AlarmType) {
+
+        val scheduler = AlarmScheduler(context)
+
+        when (type) {
+
+            AlarmType.BREAKFAST -> {
+                scheduler.scheduleAlarm(8, 0, AlarmType.BREAKFAST, 1001)
+            }
+
+            AlarmType.LUNCH -> {
+                scheduler.scheduleAlarm(12, 0, AlarmType.LUNCH, 1002)
+            }
+
+            AlarmType.DINNER -> {
+                scheduler.scheduleAlarm(19, 0, AlarmType.DINNER, 1003)
+            }
+
+            AlarmType.CUSTOM -> {
+                // nanti custom alarm akan kita handle
+            }
+        }
     }
 }
