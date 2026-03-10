@@ -16,11 +16,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import android.app.Activity
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
+import com.naqi.nomnom.R
+
 
 class ReminderActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val typeString = intent.getStringExtra("ALARM_TYPE")
+        val alarmType = try {
+            AlarmType.valueOf(typeString ?: "")
+        } catch (_: Exception) {
+            AlarmType.CUSTOM
+        }
 
         // untuk Android versi baru
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
@@ -35,13 +46,13 @@ class ReminderActivity : ComponentActivity() {
         }
 
         setContent {
-            ReminderScreen()
+            ReminderScreen(alarmType)
         }
     }
 }
 
 @Composable
-fun ReminderScreen() {
+fun ReminderScreen(alarmType: AlarmType) {
 
     val context = LocalContext.current
 
@@ -56,15 +67,46 @@ fun ReminderScreen() {
         // Placeholder untuk karakter NomNom
         Box(
             modifier = Modifier
-                .size(180.dp)
+                .size(200.dp),
+            contentAlignment = Alignment.Center
         ) {
-            Text("NomNom")
+
+            Surface(
+                modifier = Modifier.fillMaxSize(),
+                shape = MaterialTheme.shapes.large,
+                tonalElevation = 4.dp
+            ) {
+
+                Box(
+                    contentAlignment = Alignment.Center
+                ) {
+
+                    Image(
+                        painter = painterResource(id = R.drawable.nomnom_character),
+                        contentDescription = "NomNom Character",
+                        modifier = Modifier.size(180.dp)
+                    )
+
+                }
+            }
+
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
+        val message = when (alarmType) {
+
+            AlarmType.BREAKFAST -> "Breakfast time 🍳"
+
+            AlarmType.LUNCH -> "Lunch time 🍜"
+
+            AlarmType.DINNER -> "Dinner time 🍛"
+
+            AlarmType.CUSTOM -> "Time to eat!"
+        }
+
         Text(
-            text = "Time to eat!",
+            text = message,
             style = MaterialTheme.typography.headlineMedium
         )
 
