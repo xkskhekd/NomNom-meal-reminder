@@ -3,10 +3,13 @@ package com.naqi.nomnom.alarm
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 
 class AlarmReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
+
+        Log.d("NomNomAlarm", "AlarmReceiver triggered")
 
         val typeString = intent.getStringExtra("ALARM_TYPE")
 
@@ -28,7 +31,7 @@ class AlarmReceiver : BroadcastReceiver() {
         when (type) {
 
             AlarmType.BREAKFAST -> {
-                scheduler.scheduleAlarm(8, 0, AlarmType.BREAKFAST, 1001)
+                scheduler.scheduleAlarm(11, 26, AlarmType.BREAKFAST, 1001)
             }
 
             AlarmType.LUNCH -> {
@@ -40,7 +43,6 @@ class AlarmReceiver : BroadcastReceiver() {
             }
 
             AlarmType.CUSTOM -> {
-                // nanti custom alarm akan kita handle
             }
         }
     }
