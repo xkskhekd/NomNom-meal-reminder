@@ -60,4 +60,31 @@ class AlarmScheduler(private val context: Context) {
             )
         }
     }
+    fun scheduleAlarmInMinutes(
+        minutes: Int,
+        type: AlarmType,
+        requestCode: Int
+    ) {
+
+        val intent = Intent(context, AlarmReceiver::class.java)
+        intent.putExtra("ALARM_TYPE", type.name)
+
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            requestCode,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val triggerTime = System.currentTimeMillis() + minutes * 60 * 1000
+
+        val alarmManager =
+            context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+        alarmManager.setExactAndAllowWhileIdle(
+            AlarmManager.RTC_WAKEUP,
+            triggerTime,
+            pendingIntent
+        )
+    }
 }
