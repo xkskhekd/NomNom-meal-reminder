@@ -156,18 +156,24 @@ fun ReminderScreen(alarmType: AlarmType) {
                     onClick = {
                         isActionTaken = true
                         characterStateName = CharacterState.SAD.name
+
+                        // FIX: Schedule alarm DULU secara synchronous
+                        // Tidak bergantung pada snackbar atau coroutine lifecycle
+                        val scheduler = AlarmScheduler(context)
+                        scheduler.scheduleAlarmInMinutes(
+                            minutes = 10,
+                            type = AlarmType.CUSTOM,
+                            requestCode = 2001
+                        )
+
+                        // Snackbar + finish di coroutine terpisah
                         scope.launch {
                             snackbarHostState.showSnackbar(
                                 message = "Okay, remind again in 10 minutes"
                             )
-                            val scheduler = AlarmScheduler(context)
-                            scheduler.scheduleAlarmInMinutes(
-                                minutes = 10,
-                                type = AlarmType.CUSTOM,
-                                requestCode = 2001
-                            )
                             if (context is Activity) context.finish()
                         }
+                        Unit
                     }
                 ) {
                     Text("Later")

@@ -5,6 +5,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import java.util.Calendar
+import android.util.Log
 
 class AlarmScheduler(private val context: Context) {
 
@@ -65,6 +66,12 @@ class AlarmScheduler(private val context: Context) {
         type: AlarmType,
         requestCode: Int
     ) {
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            Log.d("NomNomAlarm", "canScheduleExactAlarms = ${alarmManager.canScheduleExactAlarms()}")
+        }
+
         val intent = Intent(context, AlarmReceiver::class.java)
         intent.putExtra("ALARM_TYPE", type.name)
 
@@ -76,24 +83,18 @@ class AlarmScheduler(private val context: Context) {
         )
 
         val triggerTime = System.currentTimeMillis() + minutes * 60 * 1000
+        Log.d("NomNomAlarm", "Scheduling snooze in $minutes minutes, triggerTime=$triggerTime")
 
-        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-
-        // FIX: tambah canScheduleExactAlarms() check — sama seperti scheduleAlarm()
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
             if (alarmManager.canScheduleExactAlarms()) {
-                alarmManager.setExactAndAllowWhileIdle(
-                    AlarmManager.RTC_WAKEUP,
-                    triggerTime,
-                    pendingIntent
-                )
+                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent)
+                Log.d("NomNomAlarm", "Snooze alarm SET successfully")
+            } else {
+                Log.e("NomNomAlarm", "FAILED: canScheduleExactAlarms() = false")
             }
         } else {
-            alarmManager.setExactAndAllowWhileIdle(
-                AlarmManager.RTC_WAKEUP,
-                triggerTime,
-                pendingIntent
-            )
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent)
+            Log.d("NomNomAlarm", "Snooze alarm SET successfully (pre-S)")
         }
     }
 }
