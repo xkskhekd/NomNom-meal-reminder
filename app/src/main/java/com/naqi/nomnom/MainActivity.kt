@@ -21,8 +21,8 @@ class MainActivity : ComponentActivity() {
         val scheduler = AlarmScheduler(this)
 
         scheduler.scheduleAlarm(
-            hour = 23,
-            minute = 52,
+            hour = 22,
+            minute = 18,
             type = AlarmType.BREAKFAST,
             requestCode = 1001
         )

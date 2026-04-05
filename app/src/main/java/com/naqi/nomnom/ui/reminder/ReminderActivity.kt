@@ -19,6 +19,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.Image
 import androidx.compose.ui.res.painterResource
 import com.naqi.nomnom.R
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Scaffold
 
 
 class ReminderActivity : ComponentActivity() {
@@ -55,99 +61,114 @@ class ReminderActivity : ComponentActivity() {
 fun ReminderScreen(alarmType: AlarmType) {
 
     val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(32.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
 
-        // Placeholder untuk karakter NomNom
-        Box(
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) }
+    ) { padding ->
+
+        Column(
             modifier = Modifier
-                .size(200.dp),
-            contentAlignment = Alignment.Center
+                .fillMaxSize()
+                .padding(padding)
+                .padding(32.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            Surface(
-                modifier = Modifier.fillMaxSize(),
-                shape = MaterialTheme.shapes.large,
-                tonalElevation = 4.dp
+            // Placeholder untuk karakter NomNom
+            Box(
+                modifier = Modifier
+                    .size(200.dp),
+                contentAlignment = Alignment.Center
             ) {
 
-                Box(
-                    contentAlignment = Alignment.Center
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    shape = MaterialTheme.shapes.large,
+                    tonalElevation = 4.dp
                 ) {
 
-                    Image(
-                        painter = painterResource(id = R.drawable.nomnom_character),
-                        contentDescription = "NomNom Character",
-                        modifier = Modifier.size(180.dp)
-                    )
+                    Box(
+                        contentAlignment = Alignment.Center
+                    ) {
 
-                }
-            }
+                        Image(
+                            painter = painterResource(id = R.drawable.nomnom_character),
+                            contentDescription = "NomNom Character",
+                            modifier = Modifier.size(180.dp)
+                        )
 
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        val message = when (alarmType) {
-
-            AlarmType.BREAKFAST -> "Breakfast time 🍳"
-
-            AlarmType.LUNCH -> "Lunch time 🍜"
-
-            AlarmType.DINNER -> "Dinner time 🍛"
-
-            AlarmType.CUSTOM -> "Time to eat!"
-        }
-
-        Text(
-            text = message,
-            style = MaterialTheme.typography.headlineMedium
-        )
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-
-            Button(
-                onClick = {
-
-                    if (context is Activity) {
-                        context.finish()
                     }
-
                 }
-            ) {
-                Text("Ate")
+
             }
 
-            OutlinedButton(
-                onClick = {
+            Spacer(modifier = Modifier.height(24.dp))
 
-                    val scheduler = AlarmScheduler(context)
+            val message = when (alarmType) {
 
-                    scheduler.scheduleAlarmInMinutes(
-                        minutes = 10,
-                        type = AlarmType.CUSTOM,
-                        requestCode = 2001
-                    )
+                AlarmType.BREAKFAST -> "Breakfast time 🍳"
 
-                    if (context is Activity) {
-                        context.finish()
+                AlarmType.LUNCH -> "Lunch time 🍜"
+
+                AlarmType.DINNER -> "Dinner time 🍛"
+
+                AlarmType.CUSTOM -> "Time to eat!"
+            }
+
+            Text(
+                text = message,
+                style = MaterialTheme.typography.headlineMedium
+            )
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+
+                Button(
+                    onClick = {
+
+                        if (context is Activity) {
+                            context.finish()
+                        }
+
                     }
-
+                ) {
+                    Text("Ate")
                 }
-            ) {
-                Text("Later")
-            }
 
+                OutlinedButton(
+                    onClick = {
+
+                        scope.launch {
+
+                            snackbarHostState.showSnackbar(
+                                message = "Okay, remind again in 10 minutes"
+                            )
+
+                            val scheduler = AlarmScheduler(context)
+
+                            scheduler.scheduleAlarmInMinutes(
+                                minutes = 10,
+                                type = AlarmType.CUSTOM,
+                                requestCode = 2001
+                            )
+
+                            if (context is Activity) {
+                                context.finish()
+                            }
+                        }
+                    }
+                ) {
+                    Text("Later")
+                }
+
+            }
         }
     }
 }
