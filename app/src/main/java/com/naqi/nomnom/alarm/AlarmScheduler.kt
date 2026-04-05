@@ -65,7 +65,6 @@ class AlarmScheduler(private val context: Context) {
         type: AlarmType,
         requestCode: Int
     ) {
-
         val intent = Intent(context, AlarmReceiver::class.java)
         intent.putExtra("ALARM_TYPE", type.name)
 
@@ -78,13 +77,23 @@ class AlarmScheduler(private val context: Context) {
 
         val triggerTime = System.currentTimeMillis() + minutes * 60 * 1000
 
-        val alarmManager =
-            context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
-        alarmManager.setExactAndAllowWhileIdle(
-            AlarmManager.RTC_WAKEUP,
-            triggerTime,
-            pendingIntent
-        )
+        // FIX: tambah canScheduleExactAlarms() check — sama seperti scheduleAlarm()
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            if (alarmManager.canScheduleExactAlarms()) {
+                alarmManager.setExactAndAllowWhileIdle(
+                    AlarmManager.RTC_WAKEUP,
+                    triggerTime,
+                    pendingIntent
+                )
+            }
+        } else {
+            alarmManager.setExactAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                triggerTime,
+                pendingIntent
+            )
+        }
     }
 }
